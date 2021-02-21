@@ -26,7 +26,7 @@ resource "aws_key_pair" "quickstart_key_pair" {
 resource "aws_security_group" "rancher_sg_allowall" {
   name        = "${var.prefix}-rancher-allowall"
   description = "Rancher quickstart - allow all traffic"
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
 
 
   ingress {
@@ -50,16 +50,20 @@ resource "aws_security_group" "rancher_sg_allowall" {
 
 # AWS EC2 instance for creating a single node RKE cluster and installing the Rancher server
 resource "aws_instance" "rancher_server" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  subnet_id     = var.subnet_id_1
+  ami                  = data.aws_ami.ubuntu.id
+  instance_type        = var.instance_type
+  subnet_id            = var.subnet_id_1
   iam_instance_profile = aws_iam_instance_profile.rancher_profile.name
   depends_on = [
     aws_iam_role_policy.rancher_iam_policy,
     aws_security_group.rancher_sg_allowall,
   ]
 
-  key_name        = aws_key_pair.quickstart_key_pair.key_name
+  metadata_options {
+    http_tokens = "required"
+  }
+
+  key_name               = aws_key_pair.quickstart_key_pair.key_name
   vpc_security_group_ids = [aws_security_group.rancher_sg_allowall.id]
 
   user_data = templatefile(
@@ -72,8 +76,8 @@ resource "aws_instance" "rancher_server" {
 
   root_block_device {
     volume_size = 16
-    encrypted = true
-    kms_key_id = var.ebs_kms_key_id
+    encrypted   = true
+    kms_key_id  = var.ebs_kms_key_id
 
   }
 
@@ -113,7 +117,7 @@ module "rancher_common" {
 
   rancher_server_dns = join(".", ["rancher", aws_instance.rancher_server.private_ip, "xip.io"])
 
-  admin_password     = var.rancher_server_admin_password
+  admin_password = var.rancher_server_admin_password
 
   workload_kubernetes_version = var.workload_kubernetes_version
   workload_cluster_name       = "quickstart-aws-custom"
@@ -121,16 +125,22 @@ module "rancher_common" {
 
 # AWS EC2 instance for creating a single node workload cluster
 resource "aws_instance" "quickstart_node" {
-  ami           = data.aws_ami.ubuntu.id
-  subnet_id     = var.subnet_id_1
-  instance_type = var.instance_type
+  ami                  = data.aws_ami.ubuntu.id
+  subnet_id            = var.subnet_id_1
+  instance_type        = var.instance_type
   iam_instance_profile = aws_iam_instance_profile.rancher_profile.name
   depends_on = [
     aws_iam_role_policy.rancher_iam_policy,
     aws_security_group.rancher_sg_allowall,
   ]
+  root_block_device {
+    encrypted = true
+  }
+  metadata_options {
+    http_tokens = "required"
+  }
 
-  key_name        = aws_key_pair.quickstart_key_pair.key_name
+  key_name               = aws_key_pair.quickstart_key_pair.key_name
   vpc_security_group_ids = [aws_security_group.rancher_sg_allowall.id]
 
 
