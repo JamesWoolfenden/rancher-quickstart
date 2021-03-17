@@ -50,6 +50,8 @@ resource "aws_security_group" "rancher_sg_allowall" {
 
 # AWS EC2 instance for creating a single node RKE cluster and installing the Rancher server
 resource "aws_instance" "rancher_server" {
+  #checkov:skip=CKV_GCP_38
+  #checkov:skip=CKV_GCP_32
   ami                  = data.aws_ami.ubuntu.id
   instance_type        = var.instance_type
   subnet_id            = var.subnet_id_1
@@ -125,6 +127,7 @@ module "rancher_common" {
 
 # AWS EC2 instance for creating a single node workload cluster
 resource "aws_instance" "quickstart_node" {
+  #checkov:skip=CKV_GCP_32
   ami                  = data.aws_ami.ubuntu.id
   subnet_id            = var.subnet_id_1
   instance_type        = var.instance_type

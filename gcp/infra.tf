@@ -40,6 +40,10 @@ resource "google_compute_firewall" "rancher_fw_allowall" {
 
 # GCP Compute Instance for creating a single node RKE cluster and installing the Rancher server
 resource "google_compute_instance" "rancher_server" {
+  #checkov:skip=CKV_GCP_30
+  #checkov:skip=CKV_GCP_32
+  #checkov:skip=CKV_GCP_38
+  #checkov:skip=CKV_GCP_39
   depends_on = [
     google_compute_firewall.rancher_fw_allowall,
   ]
@@ -110,6 +114,11 @@ module "rancher_common" {
 
 # GCP compute instance for creating a single node workload cluster
 resource "google_compute_instance" "quickstart_node" {
+  #checkov:skip=CKV_GCP_38
+  #checkov:skip=CKV_GCP_30
+  #checkov:skip=CKV_GCP_32
+  #checkov:skip=CKV_GCP_39
+  
   depends_on = [
     google_compute_firewall.rancher_fw_allowall,
   ]
